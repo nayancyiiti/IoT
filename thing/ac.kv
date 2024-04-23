@@ -1,0 +1,19 @@
+#:kivy 1.11.0
+
+MDBoxLayout:
+    orientation:'vertical'
+    md_bg_color: 1, 1, 1, 1
+    MDLabel:
+        font_style : "Subtitle1"
+        size_hint_y : .1
+        text:"Air Conditioner"
+        font_style: 'Subtitle1' 
+        theme_text_color: "Custom"
+        text_color: 1, 1, 1, 1
+        font_style : "H5"
+        md_bg_color: app.theme_cls.primary_color
+
+    Image:
+        id: image
+        size_hint_y : .9
+        source: 'ac.png'
