@@ -3,8 +3,6 @@ from twisted.internet import reactor
 from twisted.internet.protocol import ServerFactory as ServFactory, connectionDone
 from twisted.internet.endpoints import TCP4ServerEndpoint
 import struct
-# from Crypto.Cipher import AES
-# from Crypto import Random
 import os
 import sqlite3
 
@@ -26,14 +24,9 @@ class CloudDB(object):
                 conn.execute('CREATE TABLE user (user_id TEXT, password_hash TEXT)')
                 conn.execute('CREATE TABLE user_thing (user_id TEXT, thing_id TEXT)')
                 conn.execute('''INSERT INTO thing(thing_id, key, thing_ip, thing_port)
-                                VALUES ('AC_rasp', '11', '10.203.4.66', 8002),
-                                       ('AC001', '11', '10.203.1.149', 8002),                             
-                                       ('LB001', '11', '10.203.1.149', 8003),
-                                       ('AC002', '11', '10.203.1.149', 8004),
-                                       ('LB003', '11', '10.203.1.149', 8003),
-                                       ('LB004', '11', '10.203.1.149', 8003),
-                                       ('LB005', '11', '10.203.1.149', 8003),
-                                       ('LB006', '11', '10.203.1.149', 8003)''')
+                                VALUES ('AC001', '11', 'localhost', 8002), 
+                                       ('AC002', '11', 'localhost', 8003),                             
+                                       ('LB001', '11', 'localhost', 8004)''')
                 conn.commit()
     
     def insert_user_info(self,user_id,user_pass):
@@ -92,12 +85,7 @@ class CloudDB(object):
             things = list(cursor.fetchall())
             print("things list is",things)
         return things   
-    # def update_ip(self, tid, ip):
-    #     with sqlite3.connect(self._filename) as conn:
-    #         query = 'UPDATE thing SET ip=:ip WHERE thing_id=:thing_id'
-    #         conn.execute(query, {'ip': ip, 'thing_id': tid})
-    #         conn.commit()
-
+   
     def authenticate_user(self, username, password_hash):
         users = []
         with sqlite3.connect(self._filename) as conn:
@@ -138,7 +126,6 @@ class Echo(Protocol):
 
     def connectionMade(self):
         print("connection made in cloud")
-        # self.send_data("oem_cloud")
          
     def dataReceived(self, data):
         data = data.decode("utf-8")
@@ -185,11 +172,6 @@ class Echo(Protocol):
         if len(payload) > 3994:
             raise MessageTooBigException("Message too big!")
         protocol_name, protocol_version = "1", "1"
-        # protocol_name, protocol_version = 1, 1
-        # st = struct.Struct('!HH')
-        # header = st.pack(protocol_name, protocol_version)
-        ## buf = (ctypes.c_char * ctypes.sizeof(header)).from_buffer_copy(header)
-        # payload = _encrypt(payload, encryption_type, key)
         header = protocol_name + ":" + protocol_version
         message = header +":"+ payload
         return message
