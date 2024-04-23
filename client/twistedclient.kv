@@ -1,0 +1,344 @@
+#:kivy 1.11.0
+#:import Label kivy.uix.label.Label
+
+ScreenManager:      
+    MDScreen:
+        name: 'user_login'
+        MDBoxLayout:
+            orientation: 'vertical' 
+            md_bg_color: .94, .949, .956, 1
+
+            MDLabel:
+                size_hint_y: .2
+                halign: "center"
+                text: 'Enter information'
+            
+            AnchorLayout:
+                size_hint_y: .1
+                md_bg_color: app.theme_cls.primary_color
+                MDTextField:
+                    id: user_id
+                    size_hint: .4, 1
+                    hint_text: "User id"
+                    color_mode: "custom"
+                    required: True
+                    helper_text_mode: "on_error"
+                    helper_text: "This field is required"
+                    # line_color_focus: 1, 0, 1, 1
+            
+            AnchorLayout:  
+                size_hint_y: .1  
+                MDTextField:
+                    id: user_pass
+                    size_hint: .4, 1
+                    hint_text: "Password"
+                    color_mode: "custom"
+                    required: True
+                    helper_text_mode: "on_error"
+                    helper_text: "This field is required"     
+                    password: True               
+                    # line_color_focus: 1, 0, 1, 1            
+            
+            MDLabel:
+                size_hint_y: .1
+
+            MDRectangleFlatButton:
+                id: oem_submit
+                text: 'Submit'
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_release: app.authenticate_user_id() 
+
+            MDLabel:
+                id:user_invalid
+                size_hint_y: .1
+                theme_text_color: "Custom"
+                text_color: 1, 0, 0, 1
+
+
+            MDLabel:
+                size_hint_y: .3
+    
+
+    MDScreen:    
+        name: 'menu'
+        # on_load: root.get_things_from_db()
+    
+        MDBoxLayout:
+            orientation: 'vertical'
+            md_bg_color: .94, .949, .956, 1
+            # pos: {0,400}
+            # size: self.size
+            MDLabel:
+                font_style: 'H5'
+                theme_text_color: "Custom"
+                md_bg_color: app.theme_cls.primary_color
+                text: 'Available things'
+                text_color: 1, 1, 1, 1
+                size_hint_y: 0.07
+            MDBoxLayout: 
+                orientation: 'vertical'   
+                id: list_of_devices_layout1
+                # adaptive_height: True
+                size_hint_y: 0.6
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    id: list_of_devices_layout
+                    size_hint_y: 1
+                    pos_hint: {"top": .85} 
+                # MDLabel:
+                #     id: list_of_devices
+                #     size_hint_y: 0.5
+                #     height: 380
+                #     pos_hint: {"center_x": .85}    
+            MDLabel:    
+                size_hint_y: 0.1
+            MDRectangleFlatButton:
+                id: add_button
+                # size_hint_y: 0.2
+                text: '+Add device'
+                pos_hint: {"center_x": .5}
+                line_width: 2
+                on_release: root.current = 'registration'
+            MDLabel:    
+                size_hint_y: 0.2
+            
+    Screen:
+        name: 'registration'
+        MDBoxLayout:
+            orientation: 'vertical' 
+            md_bg_color: .94, .949, .956, 1
+
+            MDLabel:
+                size_hint_y: .2
+                halign: "center"
+                text: 'Enter information'
+            
+            AnchorLayout:
+                size_hint_y: .1
+                md_bg_color: app.theme_cls.primary_color
+                MDTextField:
+                    id: oem_name
+                    size_hint: .4, 1
+                    hint_text: "Manufacturer name"
+                    color_mode: "custom"
+                    required: True
+                    helper_text_mode: "on_error"
+                    helper_text: "This field is required"
+                    # line_color_focus: 1, 0, 1, 1
+            
+            AnchorLayout:  
+                size_hint_y: .1  
+                MDTextField:
+                    id: oem_ip
+                    size_hint: .4, 1
+                    hint_text: "Manufacturer ip"
+                    color_mode: "custom"
+                    required: True
+                    helper_text_mode: "on_error"
+                    helper_text: "This field is required"                    
+                    # line_color_focus: 1, 0, 1, 1            
+            
+            MDLabel:
+                size_hint_y: .1
+
+            MDRectangleFlatButton:
+                id: oem_submit
+                text: 'Submit'
+                pos_hint: {"center_x": .5, "center_y": .5}
+                # on_release: app.registration_make_connection("kkkk") 
+                on_release: root.current = 'input_pass_screen'
+            
+            MDLabel:
+                size_hint_y: .4
+    
+    Screen:
+        name: 'discover'
+
+        BoxLayout:
+            orientation: 'vertical'
+            # md_bg_color: .94, .949, .956, 1
+
+            MDLabel:
+                text: 'Searching...'
+                halign: "center"
+                size_hint_y: .4
+                # md_bg_color: app.theme_cls.primary_color
+            AnchorLayout:
+                size_hint_y: .4
+                md_bg_color: app.theme_cls.primary_color    
+                MDGridLayout:
+                    cols:3
+                    size_hint: .8, 1
+                    spacing: "12dp"
+                    # pos_hint: {"center_x": .5, "center_y": .5}
+                    MDRaisedButton:
+                        id: device1
+                        text: 'Air conditioner'
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        # on_release: root.manager.current = 'connect_screen' 
+                        on_release: app.make_connection("Air conditioner","AC003","localhost:8001")      
+                        # root.manager.current = 'connect_screen' #calling the on_pre_enter() in root class only
+                        # app.connect_to_thing() #calling the connect_to_thing() in the app instance(which is the entire application) 
+
+                    MDRaisedButton:
+                        id: device2
+                        text: 'Light bulb'
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        on_release: app.make_connection("Light bulb","LB004","localhost:8001")   
+            
+                    MDRaisedButton:
+                        id: device3
+                        text: 'Smart TV'
+                        pos_hint: {"center_x": .5, "center_y": .5}
+                        on_release: app.make_connection("Smart TV","ST004","localhost:8001")
+    Screen:
+        name: 'connect_screen'
+
+        MDBoxLayout:
+            orientation: 'vertical'
+            md_bg_color: .94, .949, .956, 1
+
+        MDLabel:
+            id:connect_status
+            text: 'trying...'
+            size_hint_y: .2
+            halign: "center"    
+    
+
+    Screen:
+        name: 'input_pass_screen'
+
+        MDBoxLayout:
+            orientation: 'vertical' 
+            md_bg_color: .94, .949, .956, 1
+
+            MDLabel:
+                size_hint_y: .2
+                halign: "center"
+                text: 'Enter device information'
+
+            AnchorLayout:
+                size_hint_y: .1
+                md_bg_color: app.theme_cls.primary_color
+                MDTextField:
+                    id: device_name1
+                    size_hint: .4, 1
+                    hint_text: "Device name"
+                    color_mode: "custom"
+                    required: True
+                    helper_text_mode: "on_error"
+                    helper_text: "This field is required"
+                    # line_color_focus: 1, 0, 1, 1
+
+            AnchorLayout:
+                size_hint_y: .1
+                md_bg_color: app.theme_cls.primary_color
+                MDTextField:
+                    id: device_id
+                    size_hint: .4, 1
+                    hint_text: "Device id"
+                    color_mode: "custom"
+                    required: True
+                    helper_text_mode: "on_error"
+                    helper_text: "This field is required"
+                    # line_color_focus: 1, 0, 1, 1
+
+            AnchorLayout:  
+                size_hint_y: .1  
+                MDTextField:
+                    id: device_pass
+                    size_hint: .4, 1
+                    hint_text: "Password"
+                    color_mode: "custom"
+                    required: True
+                    helper_text_mode: "on_error"
+                    helper_text: "This field is required"
+                    password: True
+                    # line_color_focus: 1, 0, 1, 1            
+            
+            MDLabel:
+                size_hint_y: .1
+
+            MDRectangleFlatButton:
+                id: pass_submit
+                text: 'Submit'
+                pos_hint: {"center_x": .5, "center_y": .5}
+                # on_release: app.make_connection("kkkk") 
+                on_release: app.connect_to_oem() 
+
+            MDLabel:
+                id:device_invalid
+                size_hint_y: .1
+                theme_text_color: "Custom"
+                text_color: 1, 0, 0, 1
+                halign: "center"
+            MDLabel:
+                size_hint_y: .3
+
+
+    Screen:
+        name: 'ui_generation'
+        
+        MDBoxLayout:
+            orientation: 'vertical' 
+            md_bg_color: .94, .949, .956, 1
+
+            canvas:
+                # Color:
+                #     rgba: 0.88,0.6,0.48,1
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            MDLabel:
+                font_style: 'Subtitle1'
+                id : device_name
+                size_hint_y: .14
+                halign: "center"
+                text: 'Device Functionality'
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
+                font_style : "H5"
+                md_bg_color: app.theme_cls.primary_color
+
+            MDLabel:
+                size_hint_y: .2
+                size_hint_x: .92
+                pos_hint: {'x':0.036}
+                halign: "left"
+                text: 'Control'
+                font_style : "H6"
+                # md_bg_color: app.theme_cls.primary_color
+
+            MDBoxLayout:
+                # size : self.minimum_size
+                size_hint_y : None
+                height: self.minimum_height
+                size_hint_x: .92 
+                pos_hint: {'x':0.036}
+                orientation: 'vertical' 
+                spacing:"12dp"
+                id:control_info
+                control_info:control_info
+                # md_bg_color: .24, .5, .7, .8
+
+            MDLabel:
+                size_hint_y: .2
+                size_hint_x: .92
+                pos_hint: {'x':0.036}
+                halign: "left"
+                text: 'Mode'
+                font_style : "H6"
+                # md_bg_color: app.theme_cls.primary_color
+
+            MDGridLayout:  
+                size_hint_y: .3
+                size_hint_x: .92
+                pos_hint: {'x':.036, 'y':.8, 'top':.8}
+                id:grid_mode
+                grid_mode:grid_mode
+                cols: 3
+                line_color : (0.2, 0.2, 0.2, 0.1)
+                md_bg_color: 1, 1, 1, 1    
+
+            MDLabel:
+                size_hint_y: .1    
