@@ -20,15 +20,12 @@
                                   },                                 
                   "Fan" : { 
                            "STRING":{"OPTION":["low","medium","high"]}
-                         },
-                  "Fan1" : { 
-                           "STRING":{"OPTION":["low1","medium1","high1"]}
                          },      
                   "Swing" : { 
                             "BOOLEAN":["up","down"]
                            },     
                   "Power" : { 
-                            "BOOLEAN":["off","on"]
+                            "BOOLEAN":["on","off"]
                            } 
                 }
         }
