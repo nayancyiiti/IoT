@@ -50,7 +50,7 @@ class ClientDB(object):
     def insert_thing_info(self, thing):
         # print("thing_port is", thing["thing_port"])
         values = [("('%s', '%s', '%s', '%s', %d, '%s', %d, '%s')" % (thing["thing_name"], thing["thing_id"], thing["key"], thing["thing_ip"], thing["thing_port"], thing["cloud_ip"],thing["cloud_port"],thing["manifest_file"]))]
-        # print("in insert_thing_info",values)
+        print("in insert_thing_info",values)
         values = ', '.join(values)
         query = 'INSERT INTO thing VALUES %s' % values
         with sqlite3.connect(self._filename) as conn:
@@ -87,33 +87,14 @@ class EchoClient(protocol.Protocol):
         print("inside connection made")
         print(self.factory.app.ip)
         print(self.factory.app.port)
-        print(self.factory.app.server_type)    
-        # self.servers = []
-        # self.factory.servers.append(self)
-        self.factory.app.on_connect(self.transport)
-        # ConnectScreen().connect_thing("successfully connected")
-
-        # get_server_deatil_from_ip_port() from database or gat these details 
-        # from a function by saving the data in a list and implode and explode
-        # everytime. Structure can also work here.
-
-        # if(server_type == "oem_server"):
-        #     pass
-        # print(self.factory)  
-        # print(self.factory.app.__dict__)
-
-        # self.factory.app.send_data("id")
+        print(self.factory.app.server_type)  
+        self.factory.app.on_connect(self.transport)   
         
 
     def dataReceived(self, data):
         data = data.decode('utf-8')
         print("data data is",data)
-        # self.transport.write("ye dono server me jata hai.".encode('utf-8'))
-        # if (self.factory.app.server_type == "thing"):
         if("password" in data):
-            # password require
-            # print(self.factory)
-            # self.transport.write("only in deivce\n".encode('utf-8'))
             self.factory.app.password_handle(data)
 
         elif("pwd_verified" in data):
@@ -121,18 +102,15 @@ class EchoClient(protocol.Protocol):
             res = data[3]
             print("inside code pwd_verified")
             print(res)            
-            # thing_info = {'thing_name': 'Air conditioner', 'thing_id': 'AC004','key': '1234','ip':'localhost:8002'}
-            # thing_info = {'thing_name': self.factory.app.thing_name, 'thing_id': self.factory.app.thing_id,'key': '1234','thing_ip':self.factory.app.thing_ip}
-            # print("getting data from .kv file",self.factory.app.root.ids.device_id.text)
-            
+           
             
             if(res == "True"):
                 tid = self.factory.app.thing_id
                 print("tid val is ",tid);
                 # tkey = self.factory.app.thing_pass
+                self.factory.app.saved_device ="no"
                 self.factory.app.req_thing_address()
             elif(res == "False"):
-                #again ask to enter password. Max upto 3 or 5 time
                 self.factory.app.root.ids.device_invalid.text = "Device is invalid! Please provide correct information."
                 pass  
 
@@ -144,13 +122,15 @@ class EchoClient(protocol.Protocol):
             thing_info = {'thing_name': self.factory.app.thing_name, 'thing_id': self.factory.app.thing_id,'key': self.factory.app.thing_pass,'thing_ip':data[1],
                           'thing_port':data[2],'cloud_ip':self.factory.app.oem_ip,'cloud_port':self.factory.app.oem_port,
                           'manifest_file':""}
-
             # close_connection_with_oem()
             self.transport.loseConnection()
-            self.factory.app.db.insert_thing_info(thing_info)
-            
+
             # Now make the connection with thing
             self.factory.app.make_connection_with_thing(data[1],data[2])
+            
+            # Insert in database
+            self.factory.app.db.insert_thing_info(thing_info)
+            
             # self.factory.app.probe_request("Probe verify")
             print("sended probe to thing")  
         elif("file" in data):  
@@ -249,17 +229,6 @@ MDBoxLayout:
         font_style : "Subtitle1"
         text:"string"             
 '''
-# class menu(Screen):
-#     def on_pre_enter(self, *args):
-#         print("inside on_pre_enter")
-#         # self.get_things_from_db()
-
-# class Time (Label):
-#     def update (self, *args):
-#        print("clclcl") 
-#        self.root.ids.list_of_devices.text = "hhhhhhhh"
-#        #self.text = time.strftime('%H:%M:%S')
-#        print("self.text",self.text)
 
 class TwistedClientApp(MDApp):
     some_text = "hello world" 
@@ -319,21 +288,21 @@ class TwistedClientApp(MDApp):
             self.devices_name = MDLabel(text = "No devices available", font_style = "Subtitle1", halign = "center" )
             self.root.ids.list_of_devices_layout.add_widget(self.devices_name)
             
-    def generate_ui_and_connect(self,v1,v2,v3):      
-        self.make_connection_with_thing(v2,v3)   
+    def generate_ui_and_connect(self,v1,v2,v3):  
+        self.saved_device = "yes"    
+        self.make_connection_with_thing(v2,v3)  
         self.generate_ui(v1)
         print("connect data is", v1,v2,v3)
 
+
     def connect_to_thing(self,*args):
-        # on clicking the thing each time the last thing info will be passed
-        # because of the same variable problem in the code. Need to see how 
-        # we can solve this.
         print("in connect_to_thing")
         print(self.thing_id, self.clkd_ip, self.clkd_port)
         self.make_connection_with_thing(self.clkd_ip, self.clkd_port)
 
 
-    def generate_ui(self,file_name):        
+    def generate_ui(self,file_name):     
+        print("in generate UI")   
         self.root.current = 'ui_generation'
         # Builder.load_file('ui.kv')
         # store = JsonStore('ac.json')
@@ -342,12 +311,6 @@ class TwistedClientApp(MDApp):
         self.device = store.get('DEVICE')
         self.control = store.get('CONTROL')
         self.mode = store.get('MODE')
-       # control_len = len(self.control)        
-        
-        # print(self.control)
-        # print(self.control["temperature"])
-        # print(self.control["temperature"]["type"])
-        # self.numtype = self.control["temperature"]["type"]
 
         # Device name text
         self.root.ids.device_name.text = self.device["NAME"]
@@ -358,9 +321,6 @@ class TwistedClientApp(MDApp):
             self.b1 = MDLabel(
                 text = i
             )
-            # if(self.control[i]["type"] == "string"):                
-            #     self.root.ids.control_info.add_widget(self.b1)
-            # print("type of control",type(self.control[i]) )
             self.control_ui_generation(self.control[i],"ititial_call",0)
             
         # mode's list 
@@ -375,9 +335,6 @@ class TwistedClientApp(MDApp):
     def control_ui_generation(self, ctrl,call,count_time):
         if(call is "struct_call"):
             pass
-            # make spacing zero
-            # only write control name once
-            # only border once
 
         # print("control is",ctrl)
         for c in ctrl:            
@@ -389,11 +346,6 @@ class TwistedClientApp(MDApp):
                 self.string_control_handler(ctrl[c])
             elif(c == "STRUCT"):
                 self.struct_control_handler(ctrl[c])
-        
-            # elif(self.control[i]["type"] == "image"):
-            #     self.step_size = self.control[i]["range"][0][2]
-            #     self.root.ids.control_info.add_widget(self.numeric_layout)
-            
             else:
                 print("Not a valid type")
 
@@ -408,7 +360,6 @@ class TwistedClientApp(MDApp):
         
         self.struct_layout_outer.add_widget(self.struct_control_name)
         
-        # struct["red"][type] 
         for s in self.struct_data:
             # print(s)        
             # print(type(s))
@@ -416,9 +367,6 @@ class TwistedClientApp(MDApp):
             self.control_name = s         
             self.control_ui_generation(self.struct_data[s],"struct_calling",count)  
             count = count - 1
-            # self.struct_layout_outer.add_widget(self.numeric_layout_outer)
-            # if(self.control[i]["struct"][s]["type"] == "numeric"):
-            #     self.numeric_control_handler(s)
 
         self.struct_layout_outer.add_widget(self.struct_layout_inner)
         self.root.ids.control_info.add_widget(self.struct_layout_outer)
@@ -452,12 +400,6 @@ class TwistedClientApp(MDApp):
 
 
     def numeric_control_handler(self,ctrl,call):
-        # print("the value of i is", ctrl)
-        # self.min_range = ctrl["RANGE"][0][0]
-        # self.max_range = ctrl["RANGE"][0][1]
-        # self.step_size = ctrl["RANGE"][0][2]
-        # self.operation = ctrl["RANGE"][0][3]
-        # self.unit = ctrl["RANGE"][0][4]
         cname = self.control_name
         print("cname is", cname)
         globals()[f"cname{cname}"] = self.control_name
@@ -465,8 +407,7 @@ class TwistedClientApp(MDApp):
         globals()[f"self.max_range{cname}"] = ctrl["RANGE"][0][1]
         globals()[f"self.step_size{cname}"] = ctrl["RANGE"][0][2]
         globals()[f"self.operation{cname}"] = ctrl["RANGE"][0][3]
-        globals()[f"self.unit{cname}"] = ctrl["RANGE"][0][4]
-        
+        globals()[f"self.unit{cname}"] = ctrl["RANGE"][0][4]        
         # print("max_rangemax_range is", self.max_rangeTemperature)
 
         # numeric layout
@@ -495,8 +436,6 @@ class TwistedClientApp(MDApp):
         self.numeric_layout.add_widget(self.plus_button)
         # print(self.screen.parent)
         # print("numeric_control_handler")
-        # for child in self.numeric_layout.children:
-        #     print(child.__dict__)
         self.numeric_layout_outer.add_widget(self.numeric_control_name)
         self.numeric_layout_outer.add_widget(self.numeric_layout) 
         
@@ -525,7 +464,6 @@ class TwistedClientApp(MDApp):
         # print("option_len",len(self.option))
         
         self.screen = Builder.load_string(KV)
-        # self.menu_text = MDLabel(text = "No devices available", font_style = "Subtitle1", halign = "center")
         globals()[f"self.menu_text{cname}"] = MDTextField(text = self.option[0])
          
         self.screen.ids.string_control_name.text = self.control_name
@@ -552,10 +490,7 @@ class TwistedClientApp(MDApp):
         print("globals",globals()[f"self.menu{cname}"])
         # print(self.menuFan1)
         print("menu_items", menu_items)
-        self.screen.line_color = 0.2, 0.2, 0.2, 0.1
-        # self.screen.ids.string_control_name.text = self.control_name
-        
-        # print("xxx555",self.root.ids, self.screen.ids)        
+        self.screen.line_color = 0.2, 0.2, 0.2, 0.1       
         self.root.ids.control_info.add_widget(self.screen)
 
     def set_item(self, text_item,cname):
@@ -592,8 +527,6 @@ class TwistedClientApp(MDApp):
         if(step_diff_type is float or step_diff_type is int):
             curr_val = float(curr_val)
             step_diff = float(step_diff)
-        # elif(step_diff_type is int and curr_val_type is int):
-        #     pass
         else:
              print("step size is non-numeric")
              return
@@ -635,15 +568,11 @@ class TwistedClientApp(MDApp):
         curr_val = globals()[f"self.value_label{c_name}"].text
         step_diff = globals()[f"self.step_size{c_name}"]
         step_diff_type = type(step_diff)
-        curr_val_type = type(curr_val)    
-        # curr_val = int(float(curr_val))
-        # step_diff = int(float(step_diff))    
+        curr_val_type = type(curr_val)        
         print("curr_val",curr_val)
         if(step_diff_type is int or step_diff_type is float):
             curr_val = float(curr_val)
-            step_diff = float(step_diff)
-        # elif(step_diff_type is int and curr_val_type is int):
-        #     pass   
+            step_diff = float(step_diff)   
         else:
             print("step size is non-numeric")
             return
@@ -698,7 +627,8 @@ class TwistedClientApp(MDApp):
         # print(self.server_type)  
         if (self.server_type == "thing"):
             self.conn1 = conn
-            self.probe_request("Probe")
+            if(self.saved_device == "no"):
+                self.probe_request("Probe")
         elif(self.server_type == "oem_server"):
             self.conn2 = conn
             self.device_verification()
@@ -715,9 +645,6 @@ class TwistedClientApp(MDApp):
         self.conn1.write(self.data.encode("utf-8"))    
     
     def make_connection_with_thing(self,ip,port):
-        # self.thing_name = name
-        # self.thing_ip = ip
-        # self.thing_port = port
         print("d_data1 is")
         self.root.current = 'connect_screen'
         self.server_type = "thing"
@@ -770,8 +697,6 @@ class TwistedClientApp(MDApp):
         self.thing_id = self.root.ids.device_id.text
         self.thing_pass = self.root.ids.device_pass.text
         # self.thing_name = "AC"
-        # self.thing_id = "AC001"
-        # self.thing_pass = "11"
         print("device id is",self.thing_id)
         print(self.thing_pass)
         # device_info = "verify"+ ":" +device_id+":"+device_pass
@@ -781,34 +706,23 @@ class TwistedClientApp(MDApp):
  
     def connect_to_oem(self):
         # connecting with OEM via cloud to verify the device id and password
-        # oem_ip = "localhost"
-        # oem_port = 8001
         server_type = "oem_server"
-        # self.oem_address = self.root.ids.oem_ip.text
-        self.oem_address = "10.203.1.149:8001"
+        self.oem_address = self.root.ids.oem_ip.text
         self.oem_address = self.oem_address.split(':')
         
         self.oem_ip = self.oem_address[0]
         self.oem_port  = int(self.oem_address[1])
         print("oem ip and port is",self.oem_ip,self.oem_port)
-        # oem_name = self.root.ids.oem_name.text
-
-        # device_id = self.root.ids.device_id.text
-        # device_pass = self.root.ids.device_pass.text
-        # print(device_id)
-        # print(device_pass)
-        # TwistedClientApp1.connect_to_oem_code(self) # Reference to the different python file.
+        
         self.connect_to_server(self.oem_ip,self.oem_port,server_type); 
     
     def probe_request(self,data):
         print("inside probe request")
         print(data)
-        # print(self.conn2.__dict__)
         self.send_data(data)
     
     def req_thing_address(self):
         print("inside111 req_thing_address",self.thing_id,self.thing_pass)
-        # data = "req_add:"+tid+":"+tkey
         data = "req_add:"+self.thing_id+":"+self.thing_pass
         self.send_data_oem(data)
     
