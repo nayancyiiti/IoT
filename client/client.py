@@ -403,11 +403,21 @@ class TwistedClientApp(MDApp):
         cname = self.control_name
         print("cname is", cname)
         globals()[f"cname{cname}"] = self.control_name
-        globals()[f"self.min_range{cname}"] = ctrl["RANGE"][0][0]
-        globals()[f"self.max_range{cname}"] = ctrl["RANGE"][0][1]
-        globals()[f"self.step_size{cname}"] = ctrl["RANGE"][0][2]
-        globals()[f"self.operation{cname}"] = ctrl["RANGE"][0][3]
-        globals()[f"self.unit{cname}"] = ctrl["RANGE"][0][4]        
+        if (isinstance(ctrl["RANGE"][0], list)):
+            print("it is a list")
+            globals()[f"self.min_range{cname}"] = ctrl["RANGE"][0][0]
+            globals()[f"self.max_range{cname}"] = ctrl["RANGE"][0][1]
+            globals()[f"self.step_size{cname}"] = ctrl["RANGE"][0][2]
+            globals()[f"self.operation{cname}"] = ctrl["RANGE"][0][3]
+            globals()[f"self.unit{cname}"] = ctrl["RANGE"][0][4]
+        
+        else:    
+            globals()[f"self.min_range{cname}"] = ctrl["RANGE"][0]
+            globals()[f"self.max_range{cname}"] = ctrl["RANGE"][1]
+            globals()[f"self.step_size{cname}"] = ctrl["RANGE"][2]
+            globals()[f"self.operation{cname}"] = ctrl["RANGE"][3]
+            globals()[f"self.unit{cname}"] = ctrl["RANGE"][4]
+        
         # print("max_rangemax_range is", self.max_rangeTemperature)
 
         # numeric layout
@@ -419,7 +429,7 @@ class TwistedClientApp(MDApp):
         self.minus_button = MDFlatButton(size_hint_x = .2, text = "-", pos_hint= {"top":1})
         
         
-        globals()[f"self.value_label{cname}"] = MDLabel(size_hint_x = .3, halign = "right", text = str(ctrl["RANGE"][0][0]))
+        globals()[f"self.value_label{cname}"] = MDLabel(size_hint_x = .3, halign = "right", text = str(globals()[f"self.min_range{cname}"]))
         self.root.ids['control_val'] = globals()[f"self.value_label{cname}"] 
         self.unit_value = MDLabel(size_hint_x = .4, halign = "left", text = globals()[f"self.unit{cname}"])
         self.plus_button = MDFlatButton(size_hint_x = .2, text = "+", pos_hint= {"top":1})
