@@ -12,7 +12,7 @@
                             "Fan" : ["high"]
                            }                       
                 },
-        "CONTROL" : {
+        "ACTUATOR" : {
                   "Temperature" : {
                                    "NUMERIC":{
                                              "RANGE":[14,30,0.5,"+","C"]
